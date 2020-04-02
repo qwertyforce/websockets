@@ -1,0 +1,26 @@
+{
+  "name": "websockets",
+  "version": "1.0.0",
+  "description": "demo",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qwertyforce/websockets.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/qwertyforce/websockets/issues"
+  },
+  "homepage": "https://github.com/qwertyforce/websockets#readme",
+  "dependencies": {
+    "ws": "^7.2.3"
+  },
+  "optionalDependencies": {
+    "bufferutil": "^4.0.1",
+    "utf-8-validate": "^5.0.2"
+  }
+}

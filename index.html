@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script type="text/javascript">
+var user_id=localStorage.getItem("user_id")??"no_id"
+var socket = new WebSocket(`ws://localhost:8080/t?user_id=${user_id}`);
+socket.onopen = function (event) {
+var msg={data:user_id}
+socket.send(JSON.stringify(msg)); 
+};
+
+socket.onmessage = function (event) {
+  var msg = JSON.parse(event.data);
+  console.log(msg);
+  switch(msg.type){
+case "registration":
+localStorage.setItem("user_id",msg.id)
+break;
+case "sfqw":
+break;
+  }
+  
+}
+
+socket.onclose = function(event) {
+  if (event.wasClean) {
+    alert('clean close');
+  } else {
+    alert('dirty close');
+  }
+  alert(`code ${event.code} reason ${ event.reason}`);
+};
+
+socket.onerror = function(error) {
+  alert("Error " + error.message);
+  console.log("Error " + error.message)
+};
+
+</script>
+<title></title>
+</head>
+<body>
+
+</body>
+</html>
