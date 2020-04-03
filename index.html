@@ -3,13 +3,42 @@
 <head>
 <script type="text/javascript">
 var user_id=localStorage.getItem("user_id")??"no_id"
-var socket = new WebSocket(`ws://localhost:8080/t?user_id=${user_id}`);
-socket.onopen = function (event) {
-var msg={data:user_id}
-socket.send(JSON.stringify(msg)); 
-};
+var reconnect_timeout;
 
+function start_ws() {
+clearTimeout(reconnect_timeout);
+var interval;
+
+function try_to_recconect(){
+console.log("trying_to_recconect")
+clearInterval(interval)
+socket.close()
+start_ws()
+}
+function heartbeat() {
+  clearInterval(interval);
+  interval = setInterval(function ping() {
+  console.log("server is not responding")
+  try_to_recconect()
+}, 5000+1000);
+
+}
+var socket = new WebSocket(`ws://localhost:8080/?user_id=${user_id}`);
+socket.onopen = function(event) {
+  console.log(6)
+  heartbeat()
+  socket.send("2")
+};
 socket.onmessage = function (event) {
+  if(event.data==="1"){
+  	heartbeat()
+  	socket.send("1")
+  	return
+  }
+  if(event.data==="2"){
+  	heartbeat()
+  	return
+  }
   var msg = JSON.parse(event.data);
   console.log(msg);
   switch(msg.type){
@@ -21,7 +50,6 @@ break;
   }
   
 }
-
 socket.onclose = function(event) {
   if (event.wasClean) {
     alert('clean close');
@@ -32,10 +60,15 @@ socket.onclose = function(event) {
 };
 
 socket.onerror = function(error) {
-  alert("Error " + error.message);
-  console.log("Error " + error.message)
+  console.log("Error ")
+  socket.close()
+  reconnect_timeout=setTimeout(function(){
+  	start_ws() 
+  }, 3000);
 };
 
+}
+start_ws()
 </script>
 <title></title>
 </head>
