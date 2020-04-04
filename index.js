@@ -9,7 +9,7 @@ var Db=[]
 async function find_by_id(id){
 for (var i = 0; i < Db.length; i++) {
    if(Db[i].id===id){
-    return true
+    return Db[i]
    }
 }
 return false
@@ -34,27 +34,28 @@ async function generate_id() {
     return id;
 }
 
-async function authenticate(request,cb){
-let queryData = url.parse(request.url, true).query;
-console.log(queryData)
-let user_id=queryData.user_id
-let found= await find_by_id(user_id)
-let client;
-let err=false
-if(found){
-client=found
-}else{
-let id=await generate_id()
-client={id:id,username:null}
-Db.push(client);
+async function authenticate(request, cb) {
+  let queryData = url.parse(request.url, true).query;
+  console.log(queryData);
+  let user_id = queryData.user_id;
+  let found = await find_by_id(user_id);
+  let client;
+  let err = false;
+  if (found) {
+    client = found;
+  } else {
+    let id = await generate_id();
+    client = { id: id, username: null };
+    Db.push(client);
+  }
+  cb(err, client);
 }
-cb(err,client)
-} 
 
 
 
 
-const interval = setInterval(function ping() {
+
+const check_clients_alive = setInterval(function ping() {
   wss.clients.forEach(function each(ws) {
     if (ws.isAlive === false){console.log("not responding. killing client");return ws.terminate();}
     ws.isAlive = false;
@@ -74,12 +75,12 @@ wss.on('connection', function connection(ws) {
   	}
   	var msg=JSON.parse(data)
    	console.log(msg)
-  	// console.log(JSON.stringify(client));
-   //  console.log(`Received message ${msg} from user ${JSON.stringify(client)}`);
-  });
+   });
+
   ws.on('close', function() {
     console.log(`${JSON.stringify(ws.data)} user disconnected`)
   });
+
 });
 
 
@@ -95,6 +96,7 @@ server.on('upgrade', async function upgrade(request, socket, head) {
     wss.handleUpgrade(request, socket, head, function done(ws) {
       ws.data=client
       wss.emit('connection', ws);
+      ws.send(JSON.stringify({type:"registration",data:client}))
     });
 
   });
