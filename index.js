@@ -35,8 +35,10 @@ async function generate_id() {
 }
 
 async function authenticate(request, cb) {
+  console.log("=====queryData=====")
   let queryData = url.parse(request.url, true).query;
   console.log(queryData);
+  console.log("===================")
   let user_id = queryData.user_id;
   let found = await find_by_id(user_id);
   let client;
@@ -63,24 +65,34 @@ const check_clients_alive = setInterval(function ping() {
   });
 }, 5000);
 
-wss.on('connection', function connection(ws) {
+wss.on("connection", function connection(ws) {
   ws.isAlive = true;
-  ws.on('message', function message(data) {
-  	if(data==='1' || data==="2"){
-  		if(data==="2"){
-         ws.send("2")
-  		}
-  		ws.isAlive = true;
-  		return
-  	}
-  	var msg=JSON.parse(data)
-   	console.log(msg)
-   });
-
-  ws.on('close', function() {
-    console.log(`${JSON.stringify(ws.data)} user disconnected`)
+  ws.on("message", function message(data) {
+    if (data === "1" || data === "2") {
+      if (data === "2") {
+        ws.send("2");
+      }
+      ws.isAlive = true;
+      return;
+    }
+    try {
+      var msg = JSON.parse(data);
+      console.log(msg);
+      switch (msg.type) {
+        case "get_data":
+          let server_data = Math.random();
+          let data={type: "message",data: `Data for ${ws.data.id}: User_data=${msg.data} Server_data=${server_data} multiplication=${server_data * parseInt(msg.data)}`}
+          ws.send(JSON.stringify(data));
+          break;
+      }
+    } catch (e) {
+      console.log(e);
+    }
   });
 
+  ws.on("close", function () {
+    console.log(`${JSON.stringify(ws.data)} user disconnected`);
+  });
 });
 
 

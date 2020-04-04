@@ -77,6 +77,10 @@ function start_ws() {
   };
 }
 start_ws();
+
+var interval2 = setInterval(function send_data() {
+    socket.send(JSON.stringify({type:"get_data",data:Math.random()*10}))
+  }, 3000);
 </script>
 <title></title>
 </head>
